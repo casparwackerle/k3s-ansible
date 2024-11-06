@@ -36,7 +36,7 @@
         helm repo update
 
     - name: Check if Rancher release exists
-      shell: helm list -n cattle-system --filter '^rancher$'
+      shell: helm list -n cattle-system | grep -w '^rancher'
       register: rancher_release_check
       ignore_errors: yes
       environment:
@@ -47,43 +47,16 @@
       when: rancher_release_check.rc == 0
       environment:
         KUBECONFIG: /home/ubuntu/.kube/config
-      register: helm_uninstall
-      ignore_errors: yes
 
-    - name: Check for remaining resources in cattle-system after uninstall
-      shell: kubectl get all -n cattle-system
-      register: cattle_resources
-      when: helm_uninstall.rc != 0 or "Uninstalling" in helm_uninstall.stdout
-      ignore_errors: yes
-
-    - name: Remove finalizers from resources in cattle-system
-      shell: |
-        kubectl get {{ resource_type }} -n cattle-system -o json |
-        jq '.items[] | select(.metadata.finalizers) | .metadata.name' -r |
-        xargs -I {} kubectl patch {{ resource_type }} {} -n cattle-system -p '{"metadata":{"finalizers":[]}}' --type=merge
-      loop:
-        - deployments
-        - replicasets
-        - services
-        - jobs
-        - configmaps
-        - secrets
-        - persistentvolumeclaims
-      when: cattle_resources.stdout != ""
-      environment:
-        KUBECONFIG: /home/ubuntu/.kube/config
-      ignore_errors: yes
-
-    - name: Force delete cattle-system namespace if uninstall is stuck
-      shell: kubectl delete namespace cattle-system --force --grace-period=0
-      when: helm_uninstall.rc != 0 or "Uninstalling" in helm_uninstall.stdout
-      environment:
-        KUBECONFIG: /home/ubuntu/.kube/config
+    - name: Delete cattle-system namespace if still present
+      command: kubectl delete namespace cattle-system --ignore-not-found
+      when: rancher_release_check.rc == 0
       ignore_errors: yes
 
     - name: Wait for cattle-system namespace to be fully deleted
       shell: |
         while kubectl get namespace cattle-system; do sleep 5; done
+      when: rancher_release_check.rc == 0
       retries: 10
       delay: 10
 
@@ -106,8 +79,8 @@
       shell: |
         helm install rancher rancher-stable/rancher \
           --namespace cattle-system \
-          --set hostname={{ rancher_hostname }} \
-          --set tls=external \
+          --set hostname={{ rancher_hostname }}
+          --set tls=external
           --set bootstrapPassword={{ bootstrappassword }}
       environment:
         KUBECONFIG: /home/ubuntu/.kube/config
@@ -120,3 +93,4 @@
       retries: 5
       delay: 60
       until: rancher_status.stdout == "True"
+
