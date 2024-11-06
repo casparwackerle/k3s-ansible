@@ -35,31 +35,9 @@
         helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
         helm repo update
 
-    - name: Check if Rancher release exists
-      shell: helm list -n cattle-system | grep -w '^rancher'
-      register: rancher_release_check
-      ignore_errors: yes
-
-    - name: Uninstall existing Rancher release if found
-      shell: helm uninstall rancher -n cattle-system
-      when: rancher_release_check.rc == 0
-      environment:
-        KUBECONFIG: /home/ubuntu/.kube/config
-
-    - name: Delete cattle-system namespace if still present
-      command: kubectl delete namespace cattle-system --ignore-not-found
-      when: rancher_release_check.rc == 0
-      ignore_errors: yes
-
-    - name: Wait for cattle-system namespace to be fully deleted
-      shell: |
-        while kubectl get namespace cattle-system; do sleep 5; done
-      when: rancher_release_check.rc == 0
-      retries: 10
-      delay: 10
-
     - name: Create cattle-system namespace
       command: kubectl create namespace cattle-system
+      register: namespace_result
       ignore_errors: yes
 
     - name: Install cert-manager
@@ -89,4 +67,3 @@
       retries: 5
       delay: 60
       until: rancher_status.stdout == "True"
-

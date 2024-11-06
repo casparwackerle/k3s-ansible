@@ -4,7 +4,7 @@ k3s_cluster:
       hosts:
         160.85.30.104:  # This is the public IP of the control plane node
           internal_ip: 192.168.0.104  # Internal IP for the control plane
-          rancher_hostname: rancher.160.85.30.104
+          rancher_hostname: ranchernew.local
     agent:
       hosts:
         160.85.30.105:  # Public IP of worker node 1
