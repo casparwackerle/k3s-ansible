@@ -8,25 +8,24 @@ k3s_cluster:
       hosts:
         160.85.30.105:  # Public IP of worker node 1
           internal_ip: 192.168.0.105  # Internal IP of worker node 1
-        160.85.30.106:  # Public IP of worker node 2
-          internal_ip: 192.168.0.106  # Internal IP of worker node 2
+            #160.85.30.106:  # Public IP of worker node 2
+            #internal_ip: 192.168.0.106  # Internal IP of worker node 2
+
 
   # Required Vars
   vars:
     ansible_port: 22
-    ansible_user: ubuntu  # Matches your user for SSH access
+    ansible_user: ubuntu
     k3s_version: v1.30.2+k3s1
     # The token should be a random string of reasonable length. You can generate
     # one with the following commands:
     # - openssl rand -base64 64
     # - pwgen -s 64 1
     # You can use ansible-vault to encrypt this value / keep it secret.
-    token: "hDjOSG4JNh52jozRIgtUlOCWFMR13biB1byClApX9aZNTAKoLFcsio4nO3QvJhPv"  # Replace with a secure token generated using a secure method like openssl or pwgen
+    token: "hDjOSG4JNh52jozRIgtUlOCWFMR13biB1byClApX9aZNTAKoLFcsio4nO3QvJhPv"
     api_endpoint: "{{ hostvars[groups['server'][0]]['ansible_host'] | default(groups['server'][0]) }}"
-    extra_server_args:  "--node-ip=192.168.0.104"  # Ensures the server node registers with its internal IP
-    # extra_agent_args:  "--node-ip={{ inventory_hostname }}"  # Ensures agent nodes register with their internal IPs
-    extra_agent_args: "--node-ip={{hostvars[inventory_hostname].internal_ip}}"
-    rancher_hostname: "rancher.local"
+    extra_server_args: "--node-ip=192.168.0.104"
+    extra_agent_args: "--node-ip=192.168.0.105"
 
     # Optional vars
 

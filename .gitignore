@@ -2,5 +2,4 @@ venv
 .venv
 .vscode
 .vagrant
-
 playbook/debug.yml
