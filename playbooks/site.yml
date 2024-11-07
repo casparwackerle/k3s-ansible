@@ -3,6 +3,8 @@
   hosts: k3s_cluster
   gather_facts: true
   become: true
+  vars_files:
+    - vault.yml
   roles:
     - role: prereq
     - role: airgap
@@ -11,18 +13,24 @@
 - name: Setup K3S server
   hosts: server
   become: true
+  vars_files:
+    - vault.yml
   roles:
     - role: k3s_server
 
 - name: Setup K3S agent
   hosts: agent
   become: true
+  vars_files:
+    - vault.yml
   roles:
     - role: k3s_agent
 
 - name: Install and configure Rancher (only on master nodes)
   hosts: server
   become: true
+  vars_files:
+    - vault.yml
   tasks:
     - name: Ensure Helm is installed
       shell: |
@@ -67,13 +75,6 @@
       shell: kubectl rollout status deployment/cert-manager -n cert-manager --timeout=300s
       retries: 5
       delay: 30
-
-        #    - name: Check if Rancher release exists
-        #      shell: helm list -n cattle-system --filter '^rancher$'
-        #      register: rancher_release_check
-        #      ignore_errors: yes
-        #      environment:
-        #        KUBECONFIG: /home/ubuntu/.kube/config
 
     - name: Check if rancher already exists
       stat:

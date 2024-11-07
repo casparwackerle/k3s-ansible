@@ -3,3 +3,4 @@ venv
 .vscode
 .vagrant
 playbook/debug.yml
+vault.yml
