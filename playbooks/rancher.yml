@@ -1,25 +1,25 @@
 ---
-- name: Cluster prep
-  hosts: k3s_cluster
-  gather_facts: true
-  become: true
-  roles:
-    - role: prereq
-    - role: airgap
-    - role: raspberrypi
-
-- name: Setup K3S server
-  hosts: server
-  become: true
-  roles:
-    - role: k3s_server
-
-- name: Setup K3S agent
-  hosts: agent
-  become: true
-  roles:
-    - role: k3s_agent
-
+# - name: Cluster prep
+#   hosts: k3s_cluster
+#   gather_facts: true
+#   become: true
+#   roles:
+#     - role: prereq
+#     - role: airgap
+#     - role: raspberrypi
+# 
+# - name: Setup K3S server
+#   hosts: server
+#   become: true
+#   roles:
+#     - role: k3s_server
+# 
+# - name: Setup K3S agent
+#   hosts: agent
+#   become: true
+#   roles:
+#     - role: k3s_agent
+# 
 - name: Install and configure Rancher (only on master nodes)
   hosts: server
   become: true
@@ -40,6 +40,10 @@
       register: namespace_check
       ignore_errors: yes
     
+    - name: Debug namespace existence check
+      debug:
+        msg: "Namespace check result: {{ namespace_check }}"
+
     - name: Create cattle-system namespace if necessary
       when: namespace_check.rc != 0
       command: kubectl create namespace cattle-system

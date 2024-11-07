@@ -27,6 +27,7 @@ k3s_cluster:
     extra_server_args: "--node-ip={{ hostvars[inventory_hostname]['internal_ip'] }}"
     extra_agent_args: "--node-ip={{ hostvars[inventory_hostname]['internal_ip'] }}"
     rancher_hostname: rancher.local
+    bootstrapPassword: myrancherbootstrappassword
 
     # Optional vars
 
