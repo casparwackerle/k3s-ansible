@@ -40,3 +40,18 @@
         path: "~{{ ansible_user }}/.bashrc"
         search_string: "Added by k3s-ansible"
         state: absent
+
+    - name: Remove cert-manager installation marker file
+      file:
+        path: /var/lib/rancher/cert-manager-installed
+        state: absent
+      become: true
+      register: cert_manager_marker_removed
+
+    - name: Remove rancher installation marker file
+      file:
+        path: /var/lib/rancher/rancher-installed
+        state: absent
+      become: true
+      register: rancher_marker_removed
+

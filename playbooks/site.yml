@@ -68,25 +68,36 @@
       retries: 5
       delay: 30
 
-    - name: Check if Rancher release exists
-      shell: helm list -n cattle-system --filter '^rancher$'
-      register: rancher_release_check
-      ignore_errors: yes
-      environment:
-        KUBECONFIG: /home/ubuntu/.kube/config
+        #    - name: Check if Rancher release exists
+        #      shell: helm list -n cattle-system --filter '^rancher$'
+        #      register: rancher_release_check
+        #      ignore_errors: yes
+        #      environment:
+        #        KUBECONFIG: /home/ubuntu/.kube/config
+
+    - name: Check if rancher already exists
+      stat:
+        path: /var/lib/rancher/rancher-installed
+      register: rancher_installed
 
     - name: Install Rancher using Helm
-      when: rancher_release_check.rc != 0
+      when: not rancher_installed.stat.exists  
       shell: |
         helm install rancher rancher-stable/rancher \
           --namespace cattle-system \
           --set hostname={{ rancher_hostname }} \
           --set tls=external \
-          --set bootstrapPassword={{ bootstrappassword }}
+          --set bootstrapPassword={{ bootstrapPassword }}
       environment:
         KUBECONFIG: /home/ubuntu/.kube/config
       args:
         creates: /var/lib/rancher/rancher-installed
+
+    - name: Mark rancher as installed
+      file:
+        path: /var/lib/rancher/rancher-installed
+        state: touch
+      when: not rancher_installed.stat.exists
 
     - name: Verify Rancher deployment status THIS TAKES A WHILE
       shell: kubectl -n cattle-system get deploy rancher -o jsonpath="{.status.conditions[?(@.type=='Available')].status}"
