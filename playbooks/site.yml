@@ -4,7 +4,7 @@
   gather_facts: true
   become: true
   vars_files:
-    - vault.yml
+    - ../../configs/vault.yml
   roles:
     - role: prereq
     - role: airgap
@@ -14,7 +14,7 @@
   hosts: server
   become: true
   vars_files:
-    - vault.yml
+    - ../../configs/vault.yml
   roles:
     - role: k3s_server
 
@@ -22,14 +22,15 @@
   hosts: agent
   become: true
   vars_files:
-    - vault.yml
+  #  - vault.yml
+    - ../../configs/vault.yml
   roles:
     - role: k3s_agent
 
-- name: Install and configure Rancher
-  hosts: server
-  become: true
-  vars_files:
-    - vault.yml
-  roles:
-    - role: rancher
+#- name: Install and configure Rancher
+#  hosts: server
+#  become: true
+#  vars_files:
+#    - vault.yml
+#  roles:
+#    - role: rancher
